@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pelaporan Eksekutif Laporan Kecamatan 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts Inter & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                        },
+                        sunshine: '#FFB800',
+                        coral: '#FF6B6B',
+                        mint: '#2ECC71',
+                        sky: '#48DBFB',
+                        lavender: '#A55EEA',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F8FAFC;
+        }
+        .card-glow {
+            box-shadow: 0 10px 25px -5px rgba(255, 184, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+        .card-glow:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen pb-12">
+
+    <!-- Top Header Banner -->
+    <header class="bg-gradient-to-r from-amber-400 via-rose-400 to-sky-400 p-1">
+        <div class="bg-white/95 backdrop-blur-md px-6 py-4 rounded-b-2xl shadow-sm border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-400 flex items-center justify-center text-white shadow-lg shadow-rose-200">
+                    <i class="fa-solid font-bold fa-chart-line text-2xl"></i>
+                </div>
+                <div>
+                    <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 mb-1">
+                        <i class="fa-solid fa-sparkles mr-1"></i> Mode Laporan Eksekutif 2026
+                    </span>
+                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Dashboard Ringkasan Kinerja Kecamatan</h1>
+                </div>
+            </div>
+
+            <!-- Header Quick Actions & Date -->
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex flex-col text-right pr-3 border-r border-slate-200">
+                    <span class="text-xs text-slate-400 font-medium">Periode Laporan</span>
+                    <span class="text-sm font-bold text-slate-700">Januari - Agustus 2026</span>
+                </div>
+                <button onclick="window.print()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-print"></i> Cetak / Export PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6 space-y-6">
+
+        <!-- Filter & Alert Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            
+            <!-- Kecamatan Selector -->
+            <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-100 card-glow flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <label for="kecamatanFilter" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pilih Wilayah Kecamatan:</label>
+                    <h2 class="text-lg font-bold text-slate-800">Filter Analisis Kinerja</h2>
+                </div>
+                <div class="w-full sm:w-auto">
+                    <select id="kecamatanFilter" onchange="updateDashboard()" class="w-full sm:w-64 bg-slate-50 border-2 border-amber-200 hover:border-amber-400 focus:border-amber-500 rounded-xl px-4 py-2.5 font-bold text-slate-700 shadow-sm transition outline-none cursor-pointer">
+                        <option value="ALL">🌐 Semua Kecamatan (Agregat)</option>
+                        <option value="TELUK_KEPAYANG">📍 Kecamatan Teluk Kepayang</option>
+                        <option value="SATUI">📍 Kecamatan Satui</option>
+                        <option value="KUSAN_HULU">📍 Kecamatan Kusan Hulu</option>
+                        <option value="ANGSANA">📍 Kecamatan Angsana</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Compliance Status Card -->
+            <div id="complianceCard" class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 flex items-center gap-4 relative overflow-hidden shadow-sm">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 text-xl font-bold">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-amber-700">Status Kepatuhan Laporan</h4>
+                    <p id="complianceText" class="text-sm font-semibold text-slate-700 mt-0.5">
+                        <span class="text-rose-600 font-bold">Catatan:</span> Teluk Kepayang <span class="underline decoration-rose-400 decoration-2">belum melaporkan bulan Juli & Agustus</span>.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            
+            <!-- KPI 1: Penduduk -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-100 card-glow relative overflow-hidden">
+                <div class="w-2 h-full bg-sky-400 absolute left-0 top-0"></div>
+                <div class="flex items-center justify-between text-sky-500 mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Total Penduduk</span>
+                    <i class="fa-solid fa-users text-lg"></i>
+                </div>
+                <div id="kpiPenduduk" class="text-xl sm:text-2xl font-extrabold text-slate-800">91,098</div>
+                <p class="text-[11px] text-slate-400 font-medium mt-1">Estimasi rata-rata jiwa</p>
+            </div>
+
+            <!-- KPI 2: Kemiskinan KK -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-100 card-glow relative overflow-hidden">
+                <div class="w-2 h-full bg-rose-400 absolute left-0 top-0"></div>
+                <div class="flex items-center justify-between text-rose-500 mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Total Kemiskinan</span>
+                    <i class="fa-solid fa-hand-holding-heart text-lg"></i>
+                </div>
+                <div id="kpiKemiskinan" class="text-xl sm:text-2xl font-extrabold text-rose-600">7,882 KK</div>
+                <p id="kpiKemiskinanSub" class="text-[11px] text-rose-500 font-bold mt-1">▲ Lonjakan Jul-Agt (Angsana)</p>
+            </div>
+
+            <!-- KPI 3: Kemiskinan Ekstrem -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-100 card-glow relative overflow-hidden">
+                <div class="w-2 h-full bg-amber-400 absolute left-0 top-0"></div>
+                <div class="flex items-center justify-between text-amber-500 mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Miskin Ekstrem</span>
+                    <i class="fa-solid fa-user-slash text-lg"></i>
+                </div>
+                <div id="kpiEkstrem" class="text-xl sm:text-2xl font-extrabold text-slate-800">94 Jiwa</div>
+                <p id="kpiEkstremSub" class="text-[11px] text-emerald-600 font-medium mt-1">▼ Turun dari 114 (Tl. Kepayang)</p>
+            </div>
+
+            <!-- KPI 4: Anak Putus Sekolah -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-100 card-glow relative overflow-hidden">
+                <div class="w-2 h-full bg-indigo-400 absolute left-0 top-0"></div>
+                <div class="flex items-center justify-between text-indigo-500 mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Putus Sekolah</span>
+                    <i class="fa-solid fa-user-graduate text-lg"></i>
+                </div>
+                <div id="kpiPutusSekolah" class="text-xl sm:text-2xl font-extrabold text-slate-800">360 Anak</div>
+                <p id="kpiPutusSekolahSub" class="text-[11px] text-emerald-600 font-bold mt-1">▼ Turun di Kusan Hulu (14)</p>
+            </div>
+
+            <!-- KPI 5: Pengangguran -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-100 card-glow relative overflow-hidden">
+                <div class="w-2 h-full bg-purple-400 absolute left-0 top-0"></div>
+                <div class="flex items-center justify-between text-purple-500 mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Pengangguran</span>
+                    <i class="fa-solid fa-briefcase text-lg"></i>
+                </div>
+                <div id="kpiPengangguran" class="text-xl sm:text-2xl font-extrabold text-slate-800">1,054 Orang</div>
+                <p id="kpiPengangguranSub" class="text-[11px] text-slate-400 font-medium mt-1">Cenderung stagnan/naik</p>
+            </div>
+
+            <!-- KPI 6: Program MBG -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-100 card-glow relative overflow-hidden">
+                <div class="w-2 h-full bg-emerald-400 absolute left-0 top-0"></div>
+                <div class="flex items-center justify-between text-emerald-500 mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wide text-slate-400">Cakupan MBG</span>
+                    <i class="fa-solid fa-utensils text-lg"></i>
+                </div>
+                <div id="kpiMBG" class="text-xl sm:text-2xl font-extrabold text-emerald-600">24,285</div>
+                <p id="kpiMBGSub" class="text-[11px] text-slate-400 font-medium mt-1">Penerima Manfaat</p>
+            </div>
+
+        </div>
+
+        <!-- Charts Grid - Row 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Chart 1: Kemiskinan -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 card-glow">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Tren Kemiskinan & Kemiskinan Ekstrem</h3>
+                        <p class="text-xs text-slate-400 font-medium">Perbandingan tingkat kemiskinan antar kecamatan</p>
+                    </div>
+                    <span class="p-2 bg-rose-50 text-rose-500 rounded-xl text-xs font-bold">
+                        <i class="fa-solid fa-chart-area"></i>
+                    </span>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="kemiskinanChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Pendidikan & Ketenagakerjaan -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 card-glow">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Anak Putus Sekolah & Pengangguran</h3>
+                        <p class="text-xs text-slate-400 font-medium">Tingkat kerentanan sosial dan pendidikan</p>
+                    </div>
+                    <span class="p-2 bg-indigo-50 text-indigo-500 rounded-xl text-xs font-bold">
+                        <i class="fa-solid fa-chart-bar"></i>
+                    </span>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="sosialChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Charts Grid - Row 2 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Chart 3: Pelayanan & Trantibum -->
+            <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-100 card-glow">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-base">Pelayanan Non-Perizinan & Gangguan Trantibum</h3>
+                        <p class="text-xs text-slate-400 font-medium">Aktivitas layanan masyarakat dan ketertiban umum</p>
+                    </div>
+                    <span class="p-2 bg-sky-50 text-sky-500 rounded-xl text-xs font-bold">
+                        <i class="fa-solid fa-handshake"></i>
+                    </span>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="layananChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 4: MBG Distribution -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 card-glow flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-extrabold text-slate-800 text-base">Partisipasi Program MBG</h3>
+                            <p class="text-xs text-slate-400 font-medium">Makan Bergizi Gratis (PAUD-SMA/SLB)</p>
+                        </div>
+                        <span class="p-2 bg-emerald-50 text-emerald-500 rounded-xl text-xs font-bold">
+                            <i class="fa-solid fa-bowl-food"></i>
+                        </span>
+                    </div>
+                    <div class="h-52 relative flex items-center justify-center">
+                        <canvas id="mbgChart"></canvas>
+                    </div>
+                </div>
+                <div id="mbgNote" class="mt-2 text-xs bg-emerald-50 text-emerald-800 p-2.5 rounded-xl font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-emerald-500 text-sm"></i>
+                    <span>Satui (14.642) & Angsana (7.993) mencatat cakupan tertinggi.</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Strategic Briefing Section for Leadership -->
+        <div class="bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 rounded-3xl p-1 shadow-lg">
+            <div class="bg-white rounded-[23px] p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-extrabold text-slate-800">Catatan Strategis untuk Pimpinan (Executive Summary)</h2>
+                        <p class="text-xs text-slate-400">Poin penting keputusan & evaluasi kinerja lintas kecamatan</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    <!-- Point 1 -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 relative">
+                        <span class="w-7 h-7 rounded-full bg-rose-100 text-rose-600 font-bold text-xs flex items-center justify-center mb-2">1</span>
+                        <h4 class="font-bold text-sm text-slate-800 mb-1">Lonjakan Kemiskinan Angsana</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Kecamatan Angsana mengalami lonjakan angka kemiskinan drastis dari <strong>1.588 KK (Mei-Juni)</strong> menjadi <strong>4.841 KK (Juli-Agustus)</strong>. Perlu verifikasi ulang data verivali di lapangan.
+                        </p>
+                    </div>
+
+                    <!-- Point 2 -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 relative">
+                        <span class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 font-bold text-xs flex items-center justify-center mb-2">2</span>
+                        <h4 class="font-bold text-sm text-slate-800 mb-1">Tren Positif Kusan Hulu</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Penurunan signifikan pada angka anak putus sekolah di Kusan Hulu, dari awal tahun <strong>481 anak</strong> menjadi hanya <strong>14 anak (Mei-Agustus)</strong>. Program penanganan pendidikan berhasil.
+                        </p>
+                    </div>
+
+                    <!-- Point 3 -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 relative">
+                        <span class="w-7 h-7 rounded-full bg-amber-100 text-amber-600 font-bold text-xs flex items-center justify-center mb-2">3</span>
+                        <h4 class="font-bold text-sm text-slate-800 mb-1">Teguran Laporan Teluk Kepayang</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Teluk Kepayang <strong>belum menyerahkan laporan bulan Juli dan Agustus</strong> untuk seluruh indikator utama. Diperlukan surat peringatan kepatuhan pelaporan instansi.
+                        </p>
+                    </div>
+
+                    <!-- Point 4 -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 relative">
+                        <span class="w-7 h-7 rounded-full bg-sky-100 text-sky-600 font-bold text-xs flex items-center justify-center mb-2">4</span>
+                        <h4 class="font-bold text-sm text-slate-800 mb-1">Evaluasi Program MBG</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Program MBG terlaksana baik di Satui (14.642) dan Angsana (7.993). Namun <strong>Teluk Kepayang mencatatkan NIHIL (belum terjangkau)</strong> dan perlu akselerasi.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Table -->
+        <div class="bg-white rounded-2xl border border-slate-100 card-glow overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-base">Matriks Ringkasan Perbandingan Kecamatan</h3>
+                    <p class="text-xs text-slate-400">Data komparatif indikator utama berdasarkan laporan resmi 2026</p>
+                </div>
+                <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-xl">
+                    <i class="fa-solid fa-table mr-1"></i> Data Resmi PDF
+                </span>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-xs text-slate-700">
+                    <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+                        <tr>
+                            <th class="py-3.5 px-4">Nama Kecamatan</th>
+                            <th class="py-3.5 px-4">Estimasi Penduduk</th>
+                            <th class="py-3.5 px-4">Kemiskinan (KK/Jiwa)</th>
+                            <th class="py-3.5 px-4">Anak Putus Sekolah</th>
+                            <th class="py-3.5 px-4">Pengangguran</th>
+                            <th class="py-3.5 px-4">Program MBG</th>
+                            <th class="py-3.5 px-4">Status Pelaporan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryTableBody" class="divide-y divide-slate-100 font-medium">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Data Structures from PDF Report
+        const kecamatanData = {
+            TELUK_KEPAYANG: {
+                name: "Teluk Kepayang",
+                penduduk: "3,321 Jiwa",
+                pendudukVal: 3321,
+                kemiskinan: "862 - 876 Jiwa",
+                kemiskinanVal: 876,
+                ekstrem: "94 Jiwa (Awal 114)",
+                ekstremVal: 94,
+                putusSekolah: "169 Anak (Awal 178)",
+                putusSekolahVal: 169,
+                pengangguran: "382 Jiwa",
+                pengangguranVal: 382,
+                mbg: "0 (Nihil / Tidak Ada)",
+                mbgVal: 0,
+                status: "Belum melaporkan Juli & Agustus",
+                statusColor: "bg-rose-100 text-rose-700 border-rose-200",
+                layananMax: 3,
+                trantibumMax: 37,
+                koperasi: "10 -> 2-4 Unit",
+                lansia: "199 - 209 Jiwa",
+                janda: "94 - 103 Jiwa"
+            },
+            SATUI: {
+                name: "Satui",
+                penduduk: "53,500 - 53,800 Jiwa",
+                pendudukVal: 53650,
+                kemiskinan: "803 KK",
+                kemiskinanVal: 803,
+                ekstrem: "Tidak dilaporkan detail",
+                ekstremVal: 0,
+                putusSekolah: "119 Anak",
+                putusSekolahVal: 119,
+                pengangguran: "522 Orang",
+                pengangguranVal: 522,
+                mbg: "14,642 Orang (Juli)",
+                mbgVal: 14642,
+                status: "Lengkap hingga Agustus",
+                statusColor: "bg-emerald-100 text-emerald-700 border-emerald-200",
+                layananMax: 50,
+                trantibumMax: 8,
+                koperasi: "20 Unit",
+                lansia: "1,573 - 2,461 Orang",
+                janda: "239 Orang"
+            },
+            KUSAN_HULU: {
+                name: "Kusan Hulu",
+                penduduk: "11,953 - 11,965 Jiwa",
+                pendudukVal: 11959,
+                kemiskinan: "655 KK",
+                kemiskinanVal: 655,
+                ekstrem: "Data grafik tanpa detail",
+                ekstremVal: 0,
+                putusSekolah: "14 Anak (Awal 481)",
+                putusSekolahVal: 14,
+                pengangguran: "56 Orang (Awal 42)",
+                pengangguranVal: 56,
+                mbg: "1,650 (PAUD & SD)",
+                mbgVal: 1650,
+                status: "Lengkap hingga Agustus",
+                statusColor: "bg-emerald-100 text-emerald-700 border-emerald-200",
+                layananMax: 58,
+                trantibumMax: 2,
+                koperasi: "11 Unit",
+                lansia: "1,119 Orang",
+                janda: "341 Orang"
+            },
+            ANGSANA: {
+                name: "Angsana",
+                penduduk: "22,832 - 22,940 Jiwa",
+                pendudukVal: 22886,
+                kemiskinan: "4,841 KK (Melonjak Jul-Agt)",
+                kemiskinanVal: 4841,
+                ekstrem: "Data grafik tanpa detail",
+                ekstremVal: 0,
+                putusSekolah: "58 Anak (Awal 64)",
+                putusSekolahVal: 58,
+                pengangguran: "94 Orang",
+                pengangguranVal: 94,
+                mbg: "7,993 Orang",
+                mbgVal: 7993,
+                status: "Lengkap hingga Agustus",
+                statusColor: "bg-emerald-100 text-emerald-700 border-emerald-200",
+                layananMax: 23,
+                trantibumMax: 4,
+                koperasi: "9 Unit",
+                lansia: "612 Orang",
+                janda: "262 Orang"
+            }
+        };
+
+        // Chart Instance Holds
+        let kemiskinanChart, sosialChart, layananChart, mbgChart;
+
+        // Initialize Table
+        function renderTable() {
+            const tbody = document.getElementById('summaryTableBody');
+            tbody.innerHTML = '';
+
+            Object.keys(kecamatanData).forEach(key => {
+                const item = kecamatanData[key];
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition';
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 font-bold text-slate-800">${item.name}</td>
+                    <td class="py-3.5 px-4">${item.penduduk}</td>
+                    <td class="py-3.5 px-4 font-bold ${item.kemiskinanVal > 1500 ? 'text-rose-600' : 'text-slate-700'}">${item.kemiskinan}</td>
+                    <td class="py-3.5 px-4">${item.putusSekolah}</td>
+                    <td class="py-3.5 px-4">${item.pengangguran}</td>
+                    <td class="py-3.5 px-4 font-bold text-emerald-600">${item.mbg}</td>
+                    <td class="py-3.5 px-4">
+                        <span class="px-2.5 py-1 rounded-full border text-[10px] font-bold inline-block ${item.statusColor}">
+                            ${item.status}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Initialize All Charts
+        function initCharts() {
+            
+            // 1. Chart Kemiskinan
+            const ctx1 = document.getElementById('kemiskinanChart').getContext('2d');
+            kemiskinanChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Teluk Kepayang', 'Satui', 'Kusan Hulu', 'Angsana'],
+                    datasets: [{
+                        label: 'Jumlah Kemiskinan (KK / Jiwa)',
+                        data: [876, 803, 655, 4841],
+                        backgroundColor: ['#48DBFB', '#FFB800', '#A55EEA', '#FF6B6B'],
+                        borderRadius: 10,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // 2. Chart Sosial (Putus Sekolah vs Pengangguran)
+            const ctx2 = document.getElementById('sosialChart').getContext('2d');
+            sosialChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Teluk Kepayang', 'Satui', 'Kusan Hulu', 'Angsana'],
+                    datasets: [
+                        {
+                            label: 'Anak Putus Sekolah',
+                            data: [169, 119, 14, 58],
+                            backgroundColor: '#FF6B6B',
+                            borderRadius: 8
+                        },
+                        {
+                            label: 'Pengangguran',
+                            data: [382, 522, 56, 94],
+                            backgroundColor: '#FFB800',
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // 3. Chart Layanan & Trantibum
+            const ctx3 = document.getElementById('layananChart').getContext('2d');
+            layananChart = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: ['Teluk Kepayang', 'Satui', 'Kusan Hulu', 'Angsana'],
+                    datasets: [
+                        {
+                            label: 'Pelayanan Non-Perizinan (Puncak)',
+                            data: [3, 50, 58, 23],
+                            borderColor: '#2ECC71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Gangguan Trantibum (Max Kasus)',
+                            data: [37, 8, 2, 4],
+                            borderColor: '#FF6B6B',
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // 4. Chart MBG Doughnut
+            const ctx4 = document.getElementById('mbgChart').getContext('2d');
+            mbgChart = new Chart(ctx4, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Teluk Kepayang', 'Satui', 'Kusan Hulu', 'Angsana'],
+                    datasets: [{
+                        data: [0, 14642, 1650, 7993],
+                        backgroundColor: ['#CBD5E1', '#2ECC71', '#48DBFB', '#FFB800'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // Update Dashboard on Filter Change
+        function updateDashboard() {
+            const selected = document.getElementById('kecamatanFilter').value;
+            const complianceCard = document.getElementById('complianceCard');
+            const complianceText = document.getElementById('complianceText');
+
+            if (selected === 'ALL') {
+                // Aggregated Values
+                document.getElementById('kpiPenduduk').innerText = "91,816";
+                document.getElementById('kpiKemiskinan').innerText = "7,175+";
+                document.getElementById('kpiEkstrem').innerText = "94 Jiwa";
+                document.getElementById('kpiPutusSekolah').innerText = "360 Anak";
+                document.getElementById('kpiPengangguran').innerText = "1,054 Orang";
+                document.getElementById('kpiMBG').innerText = "24,285";
+
+                complianceCard.className = "bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 flex items-center gap-4 relative overflow-hidden shadow-sm";
+                complianceText.innerHTML = `<span class="text-rose-600 font-bold">Catatan:</span> Teluk Kepayang <span class="underline decoration-rose-400 decoration-2">belum melaporkan bulan Juli & Agustus</span>.`;
+
+                // Reset Chart Data
+                kemiskinanChart.data.labels = ['Teluk Kepayang', 'Satui', 'Kusan Hulu', 'Angsana'];
+                kemiskinanChart.data.datasets[0].data = [876, 803, 655, 4841];
+                
+                sosialChart.data.labels = ['Teluk Kepayang', 'Satui', 'Kusan Hulu', 'Angsana'];
+                sosialChart.data.datasets[0].data = [169, 119, 14, 58];
+                sosialChart.data.datasets[1].data = [382, 522, 56, 94];
+
+            } else {
+                const data = kecamatanData[selected];
+                
+                document.getElementById('kpiPenduduk').innerText = data.pendudukVal.toLocaleString('id-ID');
+                document.getElementById('kpiKemiskinan').innerText = data.kemiskinan;
+                document.getElementById('kpiEkstrem').innerText = data.ekstrem;
+                document.getElementById('kpiPutusSekolah').innerText = data.putusSekolah;
+                document.getElementById('kpiPengangguran').innerText = data.pengangguran;
+                document.getElementById('kpiMBG').innerText = data.mbgVal.toLocaleString('id-ID');
+
+                if (selected === 'TELUK_KEPAYANG') {
+                    complianceCard.className = "bg-rose-50 border border-rose-300 rounded-2xl p-5 flex items-center gap-4 relative overflow-hidden shadow-sm";
+                    complianceText.innerHTML = `<span class="text-rose-700 font-bold">PERINGATAN:</span> Belum melaporkan data bulan Juli & Agustus!`;
+                } else {
+                    complianceCard.className = "bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-center gap-4 relative overflow-hidden shadow-sm";
+                    complianceText.innerHTML = `<span class="text-emerald-700 font-bold">STATUS BAIK:</span> Laporan terkirim lengkap hingga Agustus 2026.`;
+                }
+
+                // Focus Chart on Specific Item
+                kemiskinanChart.data.labels = [data.name];
+                kemiskinanChart.data.datasets[0].data = [data.kemiskinanVal];
+
+                sosialChart.data.labels = [data.name];
+                sosialChart.data.datasets[0].data = [data.putusSekolahVal];
+                sosialChart.data.datasets[1].data = [data.pengangguranVal];
+            }
+
+            kemiskinanChart.update();
+            sosialChart.update();
+        }
+
+        // On Load Initializer
+        window.onload = function() {
+            renderTable();
+            initCharts();
+        };
+    </script>
+</body>
+</html>
